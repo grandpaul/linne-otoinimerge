@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<project name="linne-otoinimerge" default="package" basedir=".">
+        <path id="maincp">
+	  <pathelement path="/usr/share/java/junit.jar"/>
+	</path>
+	<target name="build">
+	  <javac srcdir="." includeantruntime="true">
+		<compilerarg value="-Xlint:deprecation" />
+	  </javac>
+	</target>
+	<target name="test" depends="build">
+	  <junit printsummary="yes">
+	    <formatter type="plain" usefile="false" />
+	    <test name="org.debian.paulliu.linneotoinimerge.test.TestOtoIniFileRecord"/>
+	    <classpath refid="maincp">
+	    </classpath>
+	    <classpath>
+	      <pathelement path="."/>
+	    </classpath>
+	  </junit>
+	</target>
+	<target name="test-withnet" depends="test">
+	  <junit printsummary="yes">
+	    <formatter type="plain" usefile="false" />
+	    <classpath refid="maincp">
+	    </classpath>
+	    <classpath>
+	      <pathelement path="."/>
+	    </classpath>
+	  </junit>
+	</target>
+	<target name="package" depends="build">
+	  <jar basedir="." destfile="linne-otoinimerge.jar" level="9"
+	       excludes="linne-otoinimerge.jar">
+	    <manifest>
+	      <attribute name="Manifest-Version" value="1.0" />
+	      <attribute name="Main-Class" value="org.debian.paulliu.linneotoinimerge.Main" />
+	      <attribute name="Class-Path" value="${jar.classpath} /usr/share/java/junit.jar" />
+	    </manifest>
+	  </jar>
+	</target>
+	<target name="clean">
+		<delete failonerror="false" includeemptydirs="true">
+			<fileset file="*.class" />
+			<fileset dir="org/debian/paulliu">
+			  <include name="**/*.class" />
+			</fileset>
+			<fileset file="linne-otoinimerge.jar" />
+		</delete>
+		<delete file="linne-otoinimerge_zh_TW.properties" />
+	</target>
+</project>
+        
