@@ -110,6 +110,7 @@ public class OtoIniFileReader {
 	    return ret;
 	}
 
+	OtoIniFileRecordComments comments = new OtoIniFileRecordComments();
 	while (true) {
 	    String s=null;
 	    try {
@@ -119,6 +120,11 @@ public class OtoIniFileReader {
 	    }
 	    if (s==null) {
 		break;
+	    }
+	    if (s.length()>0 && s.charAt(0)==';') {
+		/* comments */
+		comments.addComments(s);
+		continue;
 	    }
 	    OtoIniFileRecord rec = null;
 	    try {
@@ -136,6 +142,8 @@ public class OtoIniFileReader {
 		continue;
 	    }
 	    rec.setPath(path);
+	    rec.setComments(comments);
+	    comments = new OtoIniFileRecordComments();
 	    ret.add(rec);
 	}
 

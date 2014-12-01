@@ -68,8 +68,7 @@ public class Main {
 	OtoIniFileReader otoReader = new OtoIniFileReader();
 	ArrayList<OtoIniFileRecord> result1 = otoReader.getOtoIniFileRecords(otoFile);
 	TreeMap<String, OtoIniFileRecord> map1 = new TreeMap<String, OtoIniFileRecord>();
-	for (Iterator<OtoIniFileRecord> i = result1.iterator(); i.hasNext(); ) {
-	    OtoIniFileRecord r = i.next();
+	for (OtoIniFileRecord r : result1) {
 	    map1.put(r.getAlias(), r);
 	}
 	return map1;
@@ -104,7 +103,8 @@ public class Main {
 		/* check if it is update */
 		OtoIniFileRecord r1 = oldData.get(key1);
 		OtoIniFileRecord r2 = newData.get(key2);
-		if (r1.compareTo(r2)==0) {
+		if (r1.compareTo(r2)==0 && r1.getComments().compareTo(r2.getComments()) == 0) {
+		    /* equal, do nothung */
 		} else {
 		    DiffData d1 = new DiffData();
 		    d1.type = Main.DiffDataType.UPDATE;
@@ -155,17 +155,28 @@ public class Main {
 	Map<String, OtoIniFileRecord> data1 = getDataFromFile(otoFile1);
 	Map<String, OtoIniFileRecord> data2 = getDataFromFile(otoFile2);
 	ArrayList<DiffData> diffs = getDiff(data1, data2);
-	for (Iterator<DiffData> i = diffs.iterator(); i.hasNext(); ) {
-	    DiffData d = i.next();
+	for (DiffData d : diffs) {
 	    switch(d.type) {
 	    case ADD:
+		for (String j : d.newRecord.getComments().getComments()) {
+		    System.out.format("+%1$s%n",j);
+		}
 		System.out.format("+%1$s%n",d.newRecord.toString());
 		break;
 	    case DELETE:
+		for (String j : d.oldRecord.getComments().getComments()) {
+		    System.out.format("-%1$s%n",j);
+		}
 		System.out.format("-%1$s%n",d.oldRecord.toString());
 		break;
 	    case UPDATE:
+		for (String j : d.oldRecord.getComments().getComments()) {
+		    System.out.format("<%1$s%n",j);
+		}
 		System.out.format("<%1$s%n",d.oldRecord.toString());
+		for (String j : d.newRecord.getComments().getComments()) {
+		    System.out.format(">%1$s%n",j);
+		}
 		System.out.format(">%1$s%n",d.newRecord.toString());
 		break;
 	    default:
@@ -181,14 +192,16 @@ public class Main {
 	Map<String, OtoIniFileRecord> localData = getDataFromFile(local);
 
 	ArrayList<DiffData> diffs = getDiff(baseData, localData);
-	for (Iterator<DiffData> i = diffs.iterator(); i.hasNext(); ) {
-	    DiffData d = i.next();
+	for (DiffData d : diffs) {
 	    switch(d.type) {
 	    case ADD:
 		if (remoteData.containsKey(d.newRecord.getAlias())) {
 		    OtoIniFileRecord old = remoteData.get(d.newRecord.getAlias());
 		    if (old.compareTo(d.newRecord) != 0) {
 			System.out.format("Failed to add \"%1$s\" because \"%2$s\" existed%n",d.newRecord.toString(), old.toString());
+			return 1;
+		    } else if (old.getComments().compareTo(d.newRecord.getComments()) != 0) {
+			System.out.format("Failed to add \"%1$s\" because \"%2$s\" comments are different%n",d.newRecord.toString(), old.toString());
 			return 1;
 		    }
 		} else {
@@ -201,6 +214,9 @@ public class Main {
 		    if (old.compareTo(d.oldRecord) != 0) {
 			System.out.format("Failed to delete \"%1$s\" because \"%2$s\" existed%n",d.oldRecord.toString(), old.toString());
 			return 1;
+		    } else if (old.getComments().compareTo(d.oldRecord.getComments()) != 0) {
+			System.out.format("Failed to delete \"%1$s\" because \"%2$s\" comments are different%n",d.oldRecord.toString(), old.toString());
+			return 1;
 		    } else {
 			mergedData.remove(d.oldRecord.getAlias());
 		    }
@@ -210,9 +226,12 @@ public class Main {
 	    case UPDATE:
 		if (remoteData.containsKey(d.oldRecord.getAlias())) {
 		    OtoIniFileRecord old = remoteData.get(d.oldRecord.getAlias());
-		    if (old.compareTo(d.newRecord) == 0) {
+		    if (old.compareTo(d.newRecord) == 0 && old.getComments().compareTo(d.newRecord.getComments()) == 0) {
 		    } else if (old.compareTo(d.oldRecord) != 0) {
 			System.out.format("Failed to update \"%1$s\" because \"%2$s\" existed%n",d.oldRecord.toString(), old.toString());
+			return 1;
+		    } else if (old.getComments().compareTo(d.oldRecord.getComments()) != 0) {
+			System.out.format("Failed to update \"%1$s\" because \"%2$s\" comments are different%n",d.oldRecord.toString(), old.toString());
 			return 1;
 		    } else {
 			mergedData.put(d.oldRecord.getAlias(), d.newRecord);
@@ -232,9 +251,11 @@ public class Main {
 	    System.out.println(e.toString());
 	    return 1;
 	}
-	for (Iterator<String> i = mergedData.keySet().iterator(); i.hasNext(); ) {
-	    String alias = i.next();
+	for (String alias : mergedData.keySet()) {
 	    OtoIniFileRecord r = mergedData.get(alias);
+	    for (String s : r.getComments().getComments()) {
+		fout.println(s);
+	    }
 	    fout.println(r.toString());
 	}
 	fout.close();
@@ -248,8 +269,7 @@ public class Main {
 	Map<String, OtoIniFileRecord> localData = getDataFromFile(local);
 
 	ArrayList<DiffData> diffs = getDiff(baseData, localData);
-	for (Iterator<DiffData> i = diffs.iterator(); i.hasNext(); ) {
-	    DiffData d = i.next();
+	for (DiffData d : diffs) {
 	    switch(d.type) {
 	    case ADD:
 		if (remoteData.containsKey(d.newRecord.getAlias())) {
@@ -257,6 +277,27 @@ public class Main {
 		    if (old.compareTo(d.newRecord) != 0) {
 			System.out.format("Current: %1$s%n", old.toString());
 			System.out.format("Add: %1$s%n", d.newRecord.toString());
+			boolean loopFlag=true;
+			while (loopFlag) {
+			    System.out.print("Do you want to Keep or Update? (K/U)");
+			    System.out.flush();
+			    String r = stdin.gets();
+			    if (r.compareToIgnoreCase("K")==0) {
+				loopFlag=false;
+			    } else if (r.compareToIgnoreCase("U")==0) {
+				mergedData.put(d.newRecord.getAlias(), d.newRecord);
+				loopFlag=false;
+			    }
+			}
+		    } else if (old.getComments().compareTo(d.newRecord.getComments()) != 0) {
+			System.out.format("Comments: %1$s%n", old.toString());
+			for (String s : old.getComments().getComments()) {
+			    System.out.format("Current: %1$s%n", s);
+			}
+			for (String s : d.newRecord.getComments().getComments()) {
+			    System.out.format("Add: %1$s%n", s);
+			}
+
 			boolean loopFlag=true;
 			while (loopFlag) {
 			    System.out.print("Do you want to Keep or Update? (K/U)");
@@ -280,6 +321,26 @@ public class Main {
 		    if (old.compareTo(d.oldRecord) != 0) {
 			System.out.format("Current: %1$s%n", old.toString());
 			System.out.format("Delete: %1$s%n", d.oldRecord.toString());
+			boolean loopFlag=true;
+			while (loopFlag) {
+			    System.out.print("Do you want to Keep or Delete? (K/D)");
+			    System.out.flush();
+			    String r = stdin.gets();
+			    if (r.compareToIgnoreCase("K")==0) {
+				loopFlag=false;
+			    } else if (r.compareToIgnoreCase("D")==0) {
+				mergedData.remove(d.oldRecord.getAlias());
+				loopFlag=false;
+			    }
+			}
+		    } else if (old.getComments().compareTo(d.oldRecord.getComments()) != 0) {
+			System.out.format("Comments: %1$s%n", old.toString());
+			for (String s : old.getComments().getComments()) {
+			    System.out.format("Current: %1$s%n", s);
+			}
+			for (String s : d.oldRecord.getComments().getComments()) {
+			    System.out.format("Delete: %1$s%n", s);
+			}
 			boolean loopFlag=true;
 			while (loopFlag) {
 			    System.out.print("Do you want to Keep or Delete? (K/D)");
@@ -321,6 +382,29 @@ public class Main {
 				loopFlag=false;
 			    }
 			}
+		    } else if (old.getComments().compareTo(d.oldRecord.getComments()) != 0) {
+			System.out.format("Comments: %1$s%n", old.toString());
+			for (String s : d.oldRecord.getComments().getComments()) {
+			    System.out.format("Update from: %1$s%n", s);
+			}
+			for (String s : d.newRecord.getComments().getComments()) {
+			    System.out.format("Update to: %1$s%n", s);
+			}
+			boolean loopFlag=true;
+			while (loopFlag) {
+			    System.out.print("Do you want to Keep current or keep From or Update? (K/F/U)");
+			    System.out.flush();
+			    String r = stdin.gets();
+			    if (r.compareToIgnoreCase("K")==0) {
+				loopFlag=false;
+			    } else if (r.compareToIgnoreCase("F")==0) {
+				mergedData.put(d.oldRecord.getAlias(), d.oldRecord);
+				loopFlag=false;
+			    } else if (r.compareToIgnoreCase("U")==0) {
+				mergedData.put(d.newRecord.getAlias(), d.newRecord);
+				loopFlag=false;
+			    }
+			}
 		    } else {
 			mergedData.put(d.oldRecord.getAlias(), d.newRecord);
 		    }
@@ -339,9 +423,11 @@ public class Main {
 	    System.out.println(e.toString());
 	    return 1;
 	}
-	for (Iterator<String> i = mergedData.keySet().iterator(); i.hasNext(); ) {
-	    String alias = i.next();
+	for (String alias : mergedData.keySet()) {
 	    OtoIniFileRecord r = mergedData.get(alias);
+	    for (String s : r.getComments().getComments()) {
+		fout.println(s);
+	    }
 	    fout.println(r.toString());
 	}
 	fout.close();

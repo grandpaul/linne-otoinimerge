@@ -29,6 +29,7 @@ public class OtoIniFileRecord implements Comparable<OtoIniFileRecord> {
     private double blank;
     private double prevoice;
     private double overlap;
+    private OtoIniFileRecordComments comments;
 
     public OtoIniFileRecord() {
 	path=null;
@@ -88,6 +89,13 @@ public class OtoIniFileRecord implements Comparable<OtoIniFileRecord> {
     }
     public double getOverlap() {
 	return overlap;
+    }
+
+    public void setComments(OtoIniFileRecordComments comments) {
+	this.comments = comments;
+    }
+    public OtoIniFileRecordComments getComments() {
+	return comments;
     }
 
     public int compareTo(OtoIniFileRecord b) {
