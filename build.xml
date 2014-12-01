@@ -13,6 +13,7 @@
 	  <junit printsummary="yes">
 	    <formatter type="plain" usefile="false" />
 	    <test name="org.debian.paulliu.linneotoinimerge.test.TestOtoIniFileRecord"/>
+	    <test name="org.debian.paulliu.linneotoinimerge.test.TestOtoIniFileRecordComments"/>
 	    <classpath refid="maincp">
 	    </classpath>
 	    <classpath>
