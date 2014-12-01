@@ -41,7 +41,16 @@ public class Main {
 	this.logger = java.util.logging.Logger.getLogger(Main.logger_name);
     }
 
+    private static class NameGetter {
+	public String getName() {
+	    // Returns the fully qualified class name.
+	    return getClass().getDeclaringClass().getName();
+	}
+    }
+    public static final String mainClassName = new NameGetter().getName();
+
     public void usage() {
+	System.out.format("Usage: %1$s <diff|merge|resolve> [args ...]%n",Main.mainClassName);
     }
 
     public int begin(String[] argv) {
@@ -50,14 +59,26 @@ public class Main {
 	    return 0;
 	}
 	if (argv[0].compareTo("diff")==0) {
+	    if (argv.length != 3) {
+		System.out.format("diff <old.ini> <new.ini>%n");
+		return 0;
+	    }
 	    diff(new File(argv[1]), new File(argv[2]));
 	    return 0;
 	} else if (argv[0].compareTo("merge")==0) {
 	    int result;
+	    if (argv.length != 5) {
+		System.out.format("merge <remote.ini> <base.ini> <local.ini> <merged.ini>%n");
+		return 0;
+	    }
 	    result = merge(new File(argv[1]), new File(argv[2]), new File(argv[3]), new File(argv[4]));
 	    return result;
 	} else if (argv[0].compareTo("resolve")==0) {
 	    int result;
+	    if (argv.length != 5) {
+		System.out.format("resolve <remote.ini> <base.ini> <local.ini> <merged.ini>%n");
+		return 0;
+	    }
 	    result = resolve(new File(argv[1]), new File(argv[2]), new File(argv[3]), new File(argv[4]));
 	    return result;
 	}
