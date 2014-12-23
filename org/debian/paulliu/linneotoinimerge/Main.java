@@ -267,7 +267,7 @@ public class Main {
 	}
 	PrintStream fout = null;
 	try {
-	    fout = new PrintStream(merged);
+	    fout = new PrintStream(new FileOutputStream(merged), true, "UTF-16");
 	} catch (Exception e) {
 	    System.out.println(e.toString());
 	    return 1;
@@ -439,7 +439,7 @@ public class Main {
 	}
 	PrintStream fout = null;
 	try {
-	    fout = new PrintStream(merged);
+	    fout = new PrintStream(new FileOutputStream(merged), true, "UTF-16");
 	} catch (Exception e) {
 	    System.out.println(e.toString());
 	    return 1;
