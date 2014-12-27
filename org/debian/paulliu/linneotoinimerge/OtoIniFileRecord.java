@@ -100,11 +100,11 @@ public class OtoIniFileRecord implements Comparable<OtoIniFileRecord> {
 
     public int compareTo(OtoIniFileRecord b) {
 	int r = 0;
-	r = alias.compareTo(b.alias);
+	r = filename.compareTo(b.filename);
 	if (r!=0) {
 	    return r;
 	}
-	r = filename.compareTo(b.filename);
+	r = alias.compareTo(b.alias);
 	if (r!=0) {
 	    return r;
 	}
