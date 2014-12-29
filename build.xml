@@ -5,7 +5,8 @@
 	  <pathelement path="/usr/share/java/junit.jar"/>
 	</path>
 	<target name="build">
-	  <javac srcdir="." includeantruntime="true">
+	  <mkdir dir="classes"/>
+	  <javac srcdir="." destdir="classes" includeantruntime="true">
 		<compilerarg value="-Xlint:deprecation" />
 	  </javac>
 	</target>
@@ -17,7 +18,7 @@
 	    <classpath refid="maincp">
 	    </classpath>
 	    <classpath>
-	      <pathelement path="."/>
+	      <pathelement path="classes"/>
 	    </classpath>
 	  </junit>
 	</target>
@@ -27,13 +28,14 @@
 	    <classpath refid="maincp">
 	    </classpath>
 	    <classpath>
-	      <pathelement path="."/>
+	      <pathelement path="classes"/>
 	    </classpath>
 	  </junit>
 	</target>
 	<target name="package" depends="build">
-	  <jar basedir="." destfile="linne-otoinimerge.jar" level="9"
+	  <jar destfile="linne-otoinimerge.jar" level="9"
 	       excludes="linne-otoinimerge.jar">
+	    <fileset dir="classes"/>
 	    <manifest>
 	      <attribute name="Manifest-Version" value="1.0" />
 	      <attribute name="Main-Class" value="org.debian.paulliu.linneotoinimerge.Main" />
@@ -50,6 +52,6 @@
 			<fileset file="linne-otoinimerge.jar" />
 		</delete>
 		<delete file="linne-otoinimerge_zh_TW.properties" />
+		<delete dir="classes"/>
 	</target>
 </project>
-        
